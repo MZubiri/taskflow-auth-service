@@ -2,5 +2,9 @@ package com.taskflow.authservice.service;
 
 public interface JwtService {
 
-    String generarToken(String username);
+    String generarToken(Long idUsuario, String username);
+
+    String obtenerUsername(String token);
+
+    boolean validarToken(String token);
 }

@@ -1,6 +1,7 @@
 package com.taskflow.authservice.service.impl;
 
 import com.taskflow.authservice.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,18 +20,45 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
     @Override
-    public String generarToken(String username) {
+    public String generarToken(Long idUsuario, String username) {
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + expiration);
 
-        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
         return Jwts.builder()
                 .subject(username)
+                .claim("idUsuario", idUsuario)
                 .issuedAt(ahora)
                 .expiration(expiracion)
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
+    }
+
+    @Override
+    public String obtenerUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    @Override
+    public boolean validarToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token);
+
+            return true;
+        } catch (JwtException | IllegalArgumentException ex) {
+            return false;
+        }
     }
 }

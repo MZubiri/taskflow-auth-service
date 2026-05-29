@@ -49,7 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("El usuario está inactivo");
         }
 
-        String token = jwtService.generarToken(usuario.getUsername());
+        String token = jwtService.generarToken(usuario.getId(), usuario.getUsername());
 
         return new LoginResponse(token, "Bearer", usuario.getUsername());
     }
