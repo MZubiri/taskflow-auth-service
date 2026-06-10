@@ -25,10 +25,16 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("El usuario ya existe");
         }
 
+        String rol = request.getRol() != null ? request.getRol().toUpperCase() : "USER";
+        if (!"ADMIN".equals(rol) && !"USER".equals(rol)) {
+            rol = "USER";
+        }
+
         Usuario usuario = Usuario.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .activo(true)
+                .rol(rol)
                 .build();
 
         usuarioRepository.save(usuario);
@@ -49,7 +55,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("El usuario está inactivo");
         }
 
-        String token = jwtService.generarToken(usuario.getId(), usuario.getUsername());
+        String token = jwtService.generarToken(usuario.getId(), usuario.getUsername(), usuario.getRol());
 
         return new LoginResponse(token, "Bearer", usuario.getUsername());
     }

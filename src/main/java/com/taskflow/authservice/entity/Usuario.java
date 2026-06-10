@@ -23,4 +23,7 @@ public class Usuario {
     private String password;
 
     private Boolean activo;
+
+    @Column(nullable = false)
+    private String rol;
 }
